@@ -11,6 +11,11 @@ import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceScreen;
 
 public class SettingsFragment extends PreferenceFragmentCompat {
+
+    private static final int AUDIO_VIDEO = 1024;
+    private static final int COMPUTER = 256;
+    private static final int PHONE = 512;
+
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         setPreferencesFromResource(R.xml.root_preferences, rootKey);
@@ -36,7 +41,19 @@ public class SettingsFragment extends PreferenceFragmentCompat {
                 pairedDevicePreference.setKey(device.getAddress());
                 pairedDevicePreference.setSummary(device.getAddress());
                 pairedDevicePreference.setWidgetLayoutResource(R.layout.preference_widget_layout);
-
+                switch (device.getBluetoothClass().getMajorDeviceClass()) {
+                    case AUDIO_VIDEO:
+                        pairedDevicePreference.setIcon(R.drawable.ic_headset);
+                        break;
+                    case COMPUTER:
+                        pairedDevicePreference.setIcon(R.drawable.ic_laptop);
+                        break;
+                    case PHONE:
+                        pairedDevicePreference.setIcon(R.drawable.ic_phone);
+                        break;
+                    default:
+                        pairedDevicePreference.setIcon(R.drawable.ic_other);
+                }
                 // add paired device preference to paired device preference category
                 pairedDevicesPreferenceCategory.addPreference(pairedDevicePreference);
             }

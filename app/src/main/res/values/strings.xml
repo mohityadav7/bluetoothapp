@@ -1,21 +1,12 @@
 <resources>
     <string name="app_name">Bluetooth App</string>
-    <!-- Settings Activity Title -->
-    <string name="title_activity_main">Bluetooth</string>
 
     <!-- Preference Titles -->
     <string name="paired_devices_header">Paired devices</string>
     <string name="available_devices_header">Available devices</string>
 
-    <!-- Messages Preferences -->
-    <string name="signature_title">Your signature</string>
-    <string name="reply_title">Default reply action</string>
-
-    <!-- Sync Preferences -->
-    <string name="sync_title">Sync email periodically</string>
-    <string name="attachment_title">Download incoming attachments</string>
-    <string name="attachment_summary_on">Automatically download attachments for incoming emails
-    </string>
-    <string name="attachment_summary_off">Only download attachments when manually requested</string>
+    <!-- Content descriptions for ImageViews -->
+    <string name="preference_icon_content_description">Preference icon</string>
+    <string name="preference_setting_icon_content_description">Preference settings icon</string>
 
 </resources>

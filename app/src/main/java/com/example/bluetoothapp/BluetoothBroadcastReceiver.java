@@ -38,9 +38,11 @@ public class BluetoothBroadcastReceiver extends BroadcastReceiver {
                 }
                 break;
             case BluetoothAdapter.ACTION_DISCOVERY_STARTED:
+                main.updateScanMenuItemText(true);
                 Toast.makeText(context, "Discovery started", Toast.LENGTH_SHORT).show();
                 break;
             case BluetoothAdapter.ACTION_DISCOVERY_FINISHED:
+                main.updateScanMenuItemText(false);
                 Toast.makeText(context, "Discovery finished", Toast.LENGTH_SHORT).show();
                 break;
         }

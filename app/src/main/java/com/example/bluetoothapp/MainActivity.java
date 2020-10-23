@@ -24,6 +24,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     BluetoothBroadcastReceiver bluetoothBroadcastReceiver;
     SettingsFragment settingsFragment;
     HashSet<BluetoothDevice> discoveredDevices;
+    Menu optionsMenu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +60,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
+        optionsMenu = menu;
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -77,7 +79,6 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                         }
                         // start discovery
                         bluetoothAdapter.startDiscovery();
-                        item.setTitle(this.getResources().getString(R.string.stop));
                     } else {
                         Toast.makeText(this, "Allow location permission first", Toast.LENGTH_SHORT).show();
                     }
@@ -85,7 +86,6 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
             } else {
                 // stop discovery
                 if (bluetoothAdapter != null) bluetoothAdapter.cancelDiscovery();
-                item.setTitle(this.getResources().getString(R.string.scan));
             }
         }
         return super.onOptionsItemSelected(item);
@@ -108,6 +108,16 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         preferences.edit().putBoolean("bluetooth", isBtOn).apply();
         getSupportFragmentManager().beginTransaction().replace(R.id.settings, new SettingsFragment(), "SettingsFragment").commitAllowingStateLoss();
+    }
+
+    // update scan menuItem text in options menu
+    public void updateScanMenuItemText(boolean isDiscovering) {
+        MenuItem menuItem = optionsMenu.findItem(R.id.scan_menu_item);
+        if (isDiscovering) {
+            menuItem.setTitle(this.getResources().getString(R.string.stop));
+        } else {
+            menuItem.setTitle(this.getResources().getString(R.string.scan));
+        }
     }
 
     // initialize bluetooth preference, used when app is first launched

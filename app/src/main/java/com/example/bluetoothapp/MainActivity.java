@@ -27,7 +27,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     BluetoothAdapter bluetoothAdapter;
     BluetoothBroadcastReceiver bluetoothBroadcastReceiver;
     SettingsFragment settingsFragment;
-    HashSet<BluetoothDevice> discoveredDevices;
+    HashSet<BluetoothDevice> availableDevices;
     Menu optionsMenu;
 
     @Override
@@ -135,23 +135,23 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     }
 
     private void startDiscovery() {
-        // clear previously discovered devices
-        discoveredDevices = new HashSet<>();
+        // clear previously available devices
+        availableDevices = new HashSet<>();
         SettingsFragment fragment = (SettingsFragment) getSupportFragmentManager().findFragmentByTag("SettingsFragment");
         if (fragment != null && fragment.isAdded()) {
-            fragment.clearDiscoveredDevicePreferenceCategory();
+            fragment.clearavailableDevicePreferenceCategory();
         }
         // start discovery
         bluetoothAdapter.startDiscovery();
     }
 
     @Override
-    public void handleNewDeviceDiscovered(BluetoothDevice device) {
+    public void handleNewDeviceavailable(BluetoothDevice device) {
         SettingsFragment fragment = (SettingsFragment) getSupportFragmentManager().findFragmentByTag("SettingsFragment");
         if (fragment != null && fragment.isAdded()) {
-            if (!discoveredDevices.contains(device)) {
-                fragment.addDiscoveredDevicesPreferences(device);
-                discoveredDevices.add(device);
+            if (!availableDevices.contains(device)) {
+                fragment.addavailableDevicesPreferences(device);
+                availableDevices.add(device);
             }
         }
     }

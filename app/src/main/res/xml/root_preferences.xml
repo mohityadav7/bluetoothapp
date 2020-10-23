@@ -8,8 +8,8 @@
         android:title="Bluetooth" />
 
     <PreferenceCategory
-        android:title="Discovered devices"
-        android:key="discovered_devices_preference_category"
+        android:title="available devices"
+        android:key="available_devices_preference_category"
         app:isPreferenceVisible="false">
     </PreferenceCategory>
 

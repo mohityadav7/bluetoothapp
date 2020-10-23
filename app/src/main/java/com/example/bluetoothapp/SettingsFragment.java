@@ -60,43 +60,43 @@ public class SettingsFragment extends PreferenceFragmentCompat {
         }
     }
 
-    public void addDiscoveredDevicesPreferences(BluetoothDevice device) {
+    public void addavailableDevicesPreferences(BluetoothDevice device) {
         PreferenceScreen preferenceScreen = getPreferenceManager().getPreferenceScreen();
 
-        // get discovered devices preference category
-        PreferenceCategory discoveredDevicesPreferenceCategory = (PreferenceCategory) preferenceScreen.getPreference(1);
-        if (!discoveredDevicesPreferenceCategory.isVisible()) {
-            discoveredDevicesPreferenceCategory.setVisible(true);
+        // get available devices preference category
+        PreferenceCategory availableDevicesPreferenceCategory = (PreferenceCategory) preferenceScreen.getPreference(1);
+        if (!availableDevicesPreferenceCategory.isVisible()) {
+            availableDevicesPreferenceCategory.setVisible(true);
         }
 
-        // create new discovered device preference
-        Preference discoveredDevicePreference = new Preference(preferenceScreen.getContext());
-        discoveredDevicePreference.setTitle(device.getName());
-        discoveredDevicePreference.setKey(device.getAddress());
-        discoveredDevicePreference.setSummary(device.getAddress());
+        // create new available device preference
+        Preference availableDevicePreference = new Preference(preferenceScreen.getContext());
+        availableDevicePreference.setTitle(device.getName());
+        availableDevicePreference.setKey(device.getAddress());
+        availableDevicePreference.setSummary(device.getAddress());
         switch (device.getBluetoothClass().getMajorDeviceClass()) {
             case AUDIO_VIDEO:
-                discoveredDevicePreference.setIcon(R.drawable.ic_headset);
+                availableDevicePreference.setIcon(R.drawable.ic_headset);
                 break;
             case COMPUTER:
-                discoveredDevicePreference.setIcon(R.drawable.ic_laptop);
+                availableDevicePreference.setIcon(R.drawable.ic_laptop);
                 break;
             case PHONE:
-                discoveredDevicePreference.setIcon(R.drawable.ic_phone);
+                availableDevicePreference.setIcon(R.drawable.ic_phone);
                 break;
             default:
-                discoveredDevicePreference.setIcon(R.drawable.ic_other);
+                availableDevicePreference.setIcon(R.drawable.ic_other);
         }
-        // add discovered device preference to discovered device preference category
-        discoveredDevicesPreferenceCategory.addPreference(discoveredDevicePreference);
+        // add available device preference to available device preference category
+        availableDevicesPreferenceCategory.addPreference(availableDevicePreference);
     }
 
-    public void clearDiscoveredDevicePreferenceCategory() {
+    public void clearavailableDevicePreferenceCategory() {
         PreferenceScreen preferenceScreen = getPreferenceManager().getPreferenceScreen();
 
-        // get discovered devices preference category
-        PreferenceCategory discoveredDevicesPreferenceCategory = (PreferenceCategory) preferenceScreen.getPreference(1);
-        discoveredDevicesPreferenceCategory.removeAll();
-        discoveredDevicesPreferenceCategory.setVisible(false);
+        // get available devices preference category
+        PreferenceCategory availableDevicesPreferenceCategory = (PreferenceCategory) preferenceScreen.getPreference(1);
+        availableDevicesPreferenceCategory.removeAll();
+        availableDevicesPreferenceCategory.setVisible(false);
     }
 }

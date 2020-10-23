@@ -9,4 +9,8 @@
     <string name="preference_icon_content_description">Preference icon</string>
     <string name="preference_setting_icon_content_description">Preference settings icon</string>
 
+    <!-- Menu items -->
+    <string name="scan">Scan</string>
+    <string name="stop">Stop</string>
+
 </resources>

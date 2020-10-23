@@ -1,19 +1,29 @@
 package com.example.bluetoothapp;
 
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.widget.Toast;
 
+import java.util.HashSet;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.preference.PreferenceManager;
 
-public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
+public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener, BluetoothBroadcastReceiver.BluetoothBroadcastReceiverListener {
 
     private static String TAG = MainActivity.class.getSimpleName();
     BluetoothAdapter bluetoothAdapter;
     BluetoothBroadcastReceiver bluetoothBroadcastReceiver;
     SettingsFragment settingsFragment;
+    HashSet<BluetoothDevice> discoveredDevices;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,7 +34,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         settingsFragment = new SettingsFragment();
         getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.settings, settingsFragment)
+                .replace(R.id.settings, settingsFragment, "SettingsFragment")
                 .commit();
 
         // register on preference change listener
@@ -38,12 +48,52 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         // create and register bluetooth broadcast listener
         IntentFilter bluetoothIntentFilter = new IntentFilter();
         bluetoothIntentFilter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
+        bluetoothIntentFilter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
+        bluetoothIntentFilter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
+        bluetoothIntentFilter.addAction(BluetoothDevice.ACTION_FOUND);
         bluetoothBroadcastReceiver = new BluetoothBroadcastReceiver(this);
         registerReceiver(bluetoothBroadcastReceiver, bluetoothIntentFilter);
     }
 
+    // inflate options menu
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        // start and stop discovery
+        if (item.getItemId() == R.id.scan_menu_item) {
+            if (item.getTitle().equals(this.getResources().getString(R.string.scan))) {
+                if (bluetoothAdapter != null && bluetoothAdapter.isEnabled()) {
+                    if (checkLocationPermission()) {
+                        // clear previously discovered devices
+                        discoveredDevices = new HashSet<>();
+                        SettingsFragment fragment = (SettingsFragment) getSupportFragmentManager().findFragmentByTag("SettingsFragment");
+                        if (fragment != null && fragment.isAdded()) {
+                            fragment.clearDiscoveredDevicePreferenceCategory();
+                        }
+                        // start discovery
+                        bluetoothAdapter.startDiscovery();
+                        item.setTitle(this.getResources().getString(R.string.stop));
+                    } else {
+                        Toast.makeText(this, "Allow location permission first", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            } else {
+                // stop discovery
+                if (bluetoothAdapter != null) bluetoothAdapter.cancelDiscovery();
+                item.setTitle(this.getResources().getString(R.string.scan));
+            }
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
     @Override
     public void onSharedPreferenceChanged(SharedPreferences preferences, String key) {
+        // turn on/off bluetooth based on bluetooth preference
         if (key.equals("bluetooth")) {
             if (preferences.getBoolean(key, false)) {
                 turnOnBluetooth();
@@ -57,7 +107,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     public void setBluetoothStatusInPreferences(boolean isBtOn) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         preferences.edit().putBoolean("bluetooth", isBtOn).apply();
-        getSupportFragmentManager().beginTransaction().replace(R.id.settings, new SettingsFragment()).commitAllowingStateLoss();
+        getSupportFragmentManager().beginTransaction().replace(R.id.settings, new SettingsFragment(), "SettingsFragment").commitAllowingStateLoss();
     }
 
     // initialize bluetooth preference, used when app is first launched
@@ -79,6 +129,21 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         if (bluetoothAdapter != null && bluetoothAdapter.isEnabled()) {
             bluetoothAdapter.disable();
         }
+    }
+
+    @Override
+    public void handleNewDeviceDiscovered(BluetoothDevice device) {
+        SettingsFragment fragment = (SettingsFragment) getSupportFragmentManager().findFragmentByTag("SettingsFragment");
+        if (fragment != null && fragment.isAdded()) {
+            if (!discoveredDevices.contains(device)) {
+                fragment.addDiscoveredDevicesPreferences(device);
+                discoveredDevices.add(device);
+            }
+        }
+    }
+
+    private boolean checkLocationPermission() {
+        return ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
     }
 
     @Override

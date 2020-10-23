@@ -59,4 +59,44 @@ public class SettingsFragment extends PreferenceFragmentCompat {
             }
         }
     }
+
+    public void addDiscoveredDevicesPreferences(BluetoothDevice device) {
+        PreferenceScreen preferenceScreen = getPreferenceManager().getPreferenceScreen();
+
+        // get discovered devices preference category
+        PreferenceCategory discoveredDevicesPreferenceCategory = (PreferenceCategory) preferenceScreen.getPreference(1);
+        if (!discoveredDevicesPreferenceCategory.isVisible()) {
+            discoveredDevicesPreferenceCategory.setVisible(true);
+        }
+
+        // create new discovered device preference
+        Preference discoveredDevicePreference = new Preference(preferenceScreen.getContext());
+        discoveredDevicePreference.setTitle(device.getName());
+        discoveredDevicePreference.setKey(device.getAddress());
+        discoveredDevicePreference.setSummary(device.getAddress());
+        switch (device.getBluetoothClass().getMajorDeviceClass()) {
+            case AUDIO_VIDEO:
+                discoveredDevicePreference.setIcon(R.drawable.ic_headset);
+                break;
+            case COMPUTER:
+                discoveredDevicePreference.setIcon(R.drawable.ic_laptop);
+                break;
+            case PHONE:
+                discoveredDevicePreference.setIcon(R.drawable.ic_phone);
+                break;
+            default:
+                discoveredDevicePreference.setIcon(R.drawable.ic_other);
+        }
+        // add discovered device preference to discovered device preference category
+        discoveredDevicesPreferenceCategory.addPreference(discoveredDevicePreference);
+    }
+
+    public void clearDiscoveredDevicePreferenceCategory() {
+        PreferenceScreen preferenceScreen = getPreferenceManager().getPreferenceScreen();
+
+        // get discovered devices preference category
+        PreferenceCategory discoveredDevicesPreferenceCategory = (PreferenceCategory) preferenceScreen.getPreference(1);
+        discoveredDevicesPreferenceCategory.removeAll();
+        discoveredDevicesPreferenceCategory.setVisible(false);
+    }
 }

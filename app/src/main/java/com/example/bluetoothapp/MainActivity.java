@@ -13,6 +13,7 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import java.util.HashSet;
+import java.util.Timer;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -20,7 +21,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.preference.PreferenceManager;
 
-public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener, BluetoothBroadcastReceiver.BluetoothBroadcastReceiverListener {
+public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     private static final int START_DISCOVERY = 1;
     private static String TAG = MainActivity.class.getSimpleName();
@@ -29,6 +30,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     SettingsFragment settingsFragment;
     HashSet<BluetoothDevice> availableDevices;
     Menu optionsMenu;
+    Timer timer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +58,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         bluetoothIntentFilter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
         bluetoothIntentFilter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
         bluetoothIntentFilter.addAction(BluetoothDevice.ACTION_FOUND);
+        bluetoothIntentFilter.addAction(BluetoothAdapter.ACTION_SCAN_MODE_CHANGED);
         bluetoothBroadcastReceiver = new BluetoothBroadcastReceiver(this);
         registerReceiver(bluetoothBroadcastReceiver, bluetoothIntentFilter);
     }
@@ -86,10 +89,11 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences preferences, String key) {
-        // turn on/off bluetooth based on bluetooth preference
+        // turn on/off bluetooth based on bluetooth preference and make device discoverable
         if (key.equals("bluetooth")) {
             if (preferences.getBoolean(key, false)) {
                 turnOnBluetooth();
+                Utils.makeDiscoverableAfterDelay(timer, 2000);
             } else {
                 turnOffBluetooth();
             }
@@ -145,11 +149,10 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         bluetoothAdapter.startDiscovery();
     }
 
-    @Override
     public void handleNewDeviceAvailable(BluetoothDevice device) {
         SettingsFragment fragment = (SettingsFragment) getSupportFragmentManager().findFragmentByTag("SettingsFragment");
         if (fragment != null && fragment.isAdded()) {
-            if (!availableDevices.contains(device)) {
+            if (availableDevices != null && !availableDevices.contains(device)) {
                 fragment.addAvailableDevicesPreferences(device);
                 availableDevices.add(device);
             }
@@ -189,6 +192,18 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                 Toast.makeText(this, "Could not start discovery", Toast.LENGTH_SHORT).show();
             }
         }
+    }
+
+    @Override
+    protected void onPause() {
+        Utils.makeDeviceNotDiscoverable();
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        Utils.makeDeviceDiscoverable();
+        super.onResume();
     }
 
     @Override

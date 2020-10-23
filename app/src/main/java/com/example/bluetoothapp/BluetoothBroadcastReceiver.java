@@ -5,7 +5,10 @@ import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.widget.Toast;
+
+import static android.content.ContentValues.TAG;
 
 public class BluetoothBroadcastReceiver extends BroadcastReceiver {
 
@@ -45,10 +48,17 @@ public class BluetoothBroadcastReceiver extends BroadcastReceiver {
                 main.updateScanMenuItemText(false);
                 Toast.makeText(context, "Discovery finished", Toast.LENGTH_SHORT).show();
                 break;
+            case BluetoothAdapter.ACTION_SCAN_MODE_CHANGED:
+                int scanMode = intent.getIntExtra(BluetoothAdapter.EXTRA_SCAN_MODE, -1);
+                if (scanMode == BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {
+                    Toast.makeText(context, "Discoverable now", Toast.LENGTH_SHORT).show();
+                    Log.d(TAG, "onReceive: Scan mode: " + BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE);
+                } else if (scanMode == BluetoothAdapter.SCAN_MODE_CONNECTABLE) {
+                    Toast.makeText(context, "Not discoverable", Toast.LENGTH_SHORT).show();
+                    Log.d(TAG, "onReceive: Scan mode: " + BluetoothAdapter.SCAN_MODE_CONNECTABLE);
+                } else if (scanMode == BluetoothAdapter.SCAN_MODE_NONE) {
+                    Log.d(TAG, "onReceive: Scan mode: " + BluetoothAdapter.SCAN_MODE_NONE);
+                }
         }
-    }
-
-    public interface BluetoothBroadcastReceiverListener {
-        void handleNewDeviceAvailable(BluetoothDevice device);
     }
 }

@@ -1,7 +1,9 @@
 package com.example.bluetoothapp;
 
+import android.Manifest.permission;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.DialogInterface;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -13,12 +15,14 @@ import android.widget.Toast;
 import java.util.HashSet;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
+import androidx.core.app.ActivityCompat;
 import androidx.preference.PreferenceManager;
 
 public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener, BluetoothBroadcastReceiver.BluetoothBroadcastReceiverListener {
 
+    private static final int START_DISCOVERY = 1;
     private static String TAG = MainActivity.class.getSimpleName();
     BluetoothAdapter bluetoothAdapter;
     BluetoothBroadcastReceiver bluetoothBroadcastReceiver;
@@ -70,18 +74,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         if (item.getItemId() == R.id.scan_menu_item) {
             if (item.getTitle().equals(this.getResources().getString(R.string.scan))) {
                 if (bluetoothAdapter != null && bluetoothAdapter.isEnabled()) {
-                    if (checkLocationPermission()) {
-                        // clear previously discovered devices
-                        discoveredDevices = new HashSet<>();
-                        SettingsFragment fragment = (SettingsFragment) getSupportFragmentManager().findFragmentByTag("SettingsFragment");
-                        if (fragment != null && fragment.isAdded()) {
-                            fragment.clearDiscoveredDevicePreferenceCategory();
-                        }
-                        // start discovery
-                        bluetoothAdapter.startDiscovery();
-                    } else {
-                        Toast.makeText(this, "Allow location permission first", Toast.LENGTH_SHORT).show();
-                    }
+                    requestLocationPermissionForStartingDiscovery();
                 }
             } else {
                 // stop discovery
@@ -141,6 +134,17 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         }
     }
 
+    private void startDiscovery() {
+        // clear previously discovered devices
+        discoveredDevices = new HashSet<>();
+        SettingsFragment fragment = (SettingsFragment) getSupportFragmentManager().findFragmentByTag("SettingsFragment");
+        if (fragment != null && fragment.isAdded()) {
+            fragment.clearDiscoveredDevicePreferenceCategory();
+        }
+        // start discovery
+        bluetoothAdapter.startDiscovery();
+    }
+
     @Override
     public void handleNewDeviceDiscovered(BluetoothDevice device) {
         SettingsFragment fragment = (SettingsFragment) getSupportFragmentManager().findFragmentByTag("SettingsFragment");
@@ -152,8 +156,39 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         }
     }
 
-    private boolean checkLocationPermission() {
-        return ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+    private void requestLocationPermissionForStartingDiscovery() {
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission.ACCESS_FINE_LOCATION)) {
+            new AlertDialog.Builder(this)
+                    .setTitle("Grant location permission")
+                    .setMessage("Location permission is required for starting discovery")
+                    .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            ActivityCompat.requestPermissions(MainActivity.this, new String[]{permission.ACCESS_FINE_LOCATION}, START_DISCOVERY);
+                        }
+                    })
+                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            dialogInterface.dismiss();
+                        }
+                    })
+                    .show();
+        } else {
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]{permission.ACCESS_FINE_LOCATION}, START_DISCOVERY);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == START_DISCOVERY) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                startDiscovery();
+            } else {
+                Toast.makeText(this, "Could not start discovery", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     @Override

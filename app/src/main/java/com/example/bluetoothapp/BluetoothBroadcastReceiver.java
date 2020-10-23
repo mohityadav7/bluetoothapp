@@ -34,7 +34,7 @@ public class BluetoothBroadcastReceiver extends BroadcastReceiver {
             case BluetoothDevice.ACTION_FOUND:
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 if (device != null) {
-                    main.handleNewDeviceavailable(device);
+                    main.handleNewDeviceAvailable(device);
                 }
                 break;
             case BluetoothAdapter.ACTION_DISCOVERY_STARTED:
@@ -49,6 +49,6 @@ public class BluetoothBroadcastReceiver extends BroadcastReceiver {
     }
 
     public interface BluetoothBroadcastReceiverListener {
-        void handleNewDeviceavailable(BluetoothDevice device);
+        void handleNewDeviceAvailable(BluetoothDevice device);
     }
 }

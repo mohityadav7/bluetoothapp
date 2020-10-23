@@ -139,18 +139,18 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         availableDevices = new HashSet<>();
         SettingsFragment fragment = (SettingsFragment) getSupportFragmentManager().findFragmentByTag("SettingsFragment");
         if (fragment != null && fragment.isAdded()) {
-            fragment.clearavailableDevicePreferenceCategory();
+            fragment.clearAvailableDevicePreferenceCategory();
         }
         // start discovery
         bluetoothAdapter.startDiscovery();
     }
 
     @Override
-    public void handleNewDeviceavailable(BluetoothDevice device) {
+    public void handleNewDeviceAvailable(BluetoothDevice device) {
         SettingsFragment fragment = (SettingsFragment) getSupportFragmentManager().findFragmentByTag("SettingsFragment");
         if (fragment != null && fragment.isAdded()) {
             if (!availableDevices.contains(device)) {
-                fragment.addavailableDevicesPreferences(device);
+                fragment.addAvailableDevicesPreferences(device);
                 availableDevices.add(device);
             }
         }

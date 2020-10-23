@@ -60,7 +60,7 @@ public class SettingsFragment extends PreferenceFragmentCompat {
         }
     }
 
-    public void addavailableDevicesPreferences(BluetoothDevice device) {
+    public void addAvailableDevicesPreferences(BluetoothDevice device) {
         PreferenceScreen preferenceScreen = getPreferenceManager().getPreferenceScreen();
 
         // get available devices preference category
@@ -91,7 +91,7 @@ public class SettingsFragment extends PreferenceFragmentCompat {
         availableDevicesPreferenceCategory.addPreference(availableDevicePreference);
     }
 
-    public void clearavailableDevicePreferenceCategory() {
+    public void clearAvailableDevicePreferenceCategory() {
         PreferenceScreen preferenceScreen = getPreferenceManager().getPreferenceScreen();
 
         // get available devices preference category

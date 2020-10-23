@@ -146,6 +146,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
             fragment.clearAvailableDevicePreferenceCategory();
         }
         // start discovery
+        Utils.checkIfLocationEnabled(this);
         bluetoothAdapter.startDiscovery();
     }
 

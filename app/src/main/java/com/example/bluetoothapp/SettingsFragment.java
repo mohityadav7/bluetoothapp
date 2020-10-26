@@ -39,9 +39,12 @@ public class SettingsFragment extends PreferenceFragmentCompat {
                 // create new paired device preference
                 Preference pairedDevicePreference = new Preference(preferenceScreen.getContext());
                 pairedDevicePreference.setLayoutResource(R.layout.paired_device_preference_layout);
-                pairedDevicePreference.setTitle(device.getName());
+                if(device.getName() != null) {
+                    pairedDevicePreference.setTitle(device.getName());
+                } else {
+                    pairedDevicePreference.setTitle(device.getAddress());
+                }
                 pairedDevicePreference.setKey(device.getAddress());
-                pairedDevicePreference.setSummary(device.getAddress());
                 pairedDevicePreference.setWidgetLayoutResource(R.layout.preference_widget_layout);
                 switch (device.getBluetoothClass().getMajorDeviceClass()) {
                     case AUDIO_VIDEO:
@@ -69,9 +72,12 @@ public class SettingsFragment extends PreferenceFragmentCompat {
         // create new paired device preference
         Preference pairedDevicePreference = new Preference(preferenceScreen.getContext());
         pairedDevicePreference.setLayoutResource(R.layout.paired_device_preference_layout);
-        pairedDevicePreference.setTitle(device.getName());
+        if(device.getName() != null) {
+            pairedDevicePreference.setTitle(device.getName());
+        } else {
+            pairedDevicePreference.setTitle(device.getAddress());
+        }
         pairedDevicePreference.setKey(device.getAddress());
-        pairedDevicePreference.setSummary(device.getAddress());
         pairedDevicePreference.setWidgetLayoutResource(R.layout.preference_widget_layout);
         switch (device.getBluetoothClass().getMajorDeviceClass()) {
             case AUDIO_VIDEO:
@@ -114,9 +120,12 @@ public class SettingsFragment extends PreferenceFragmentCompat {
 
         // create new available device preference
         Preference availableDevicePreference = new Preference(preferenceScreen.getContext());
-        availableDevicePreference.setTitle(device.getName());
+        if(device.getName() != null) {
+            availableDevicePreference.setTitle(device.getName());
+        } else {
+            availableDevicePreference.setTitle(device.getAddress());
+        }
         availableDevicePreference.setKey(device.getAddress());
-        availableDevicePreference.setSummary(device.getAddress());
         availableDevicePreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {

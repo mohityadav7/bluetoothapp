@@ -2,6 +2,7 @@ package com.example.bluetoothapp;
 
 import android.bluetooth.BluetoothDevice;
 import android.os.Bundle;
+import android.util.Log;
 
 import java.util.Set;
 
@@ -15,6 +16,7 @@ public class SettingsFragment extends PreferenceFragmentCompat {
     private static final int AUDIO_VIDEO = 1024;
     private static final int COMPUTER = 256;
     private static final int PHONE = 512;
+    private static final String TAG = "SettingsFragment";
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
@@ -60,7 +62,48 @@ public class SettingsFragment extends PreferenceFragmentCompat {
         }
     }
 
-    public void addAvailableDevicesPreferences(BluetoothDevice device) {
+    public void addPairedDevicesPreference(final BluetoothDevice device) {
+        PreferenceScreen preferenceScreen = getPreferenceManager().getPreferenceScreen();
+        PreferenceCategory pairedDevicesPreferenceCategory = (PreferenceCategory) preferenceScreen.getPreference(2);
+
+        // create new paired device preference
+        Preference pairedDevicePreference = new Preference(preferenceScreen.getContext());
+        pairedDevicePreference.setLayoutResource(R.layout.paired_device_preference_layout);
+        pairedDevicePreference.setTitle(device.getName());
+        pairedDevicePreference.setKey(device.getAddress());
+        pairedDevicePreference.setSummary(device.getAddress());
+        pairedDevicePreference.setWidgetLayoutResource(R.layout.preference_widget_layout);
+        switch (device.getBluetoothClass().getMajorDeviceClass()) {
+            case AUDIO_VIDEO:
+                pairedDevicePreference.setIcon(R.drawable.ic_headset);
+                break;
+            case COMPUTER:
+                pairedDevicePreference.setIcon(R.drawable.ic_laptop);
+                break;
+            case PHONE:
+                pairedDevicePreference.setIcon(R.drawable.ic_phone);
+                break;
+            default:
+                pairedDevicePreference.setIcon(R.drawable.ic_other);
+        }
+        // add paired device preference to paired device preference category
+        pairedDevicesPreferenceCategory.addPreference(pairedDevicePreference);
+    }
+
+    public void updateAvailableDeviceSummary(BluetoothDevice device, int bondState) {
+        Preference preferenceToUpdate = findPreference(device.getAddress());
+        if (preferenceToUpdate != null) {
+            if (bondState == BluetoothDevice.BOND_BONDING) {
+                preferenceToUpdate.setSummary("Pairing...");
+            } else if (bondState == BluetoothDevice.BOND_BONDED) {
+                preferenceToUpdate.setSummary("Paired");
+            } else if (bondState == BluetoothDevice.BOND_NONE) {
+                preferenceToUpdate.setSummary("Could not pair");
+            }
+        }
+    }
+
+    public void addAvailableDevicesPreferences(final BluetoothDevice device) {
         PreferenceScreen preferenceScreen = getPreferenceManager().getPreferenceScreen();
 
         // get available devices preference category
@@ -74,6 +117,19 @@ public class SettingsFragment extends PreferenceFragmentCompat {
         availableDevicePreference.setTitle(device.getName());
         availableDevicePreference.setKey(device.getAddress());
         availableDevicePreference.setSummary(device.getAddress());
+        availableDevicePreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                Log.d(TAG, "onPreferenceClick: available device preference clicked: " + device.getName() + ", starting pairing.");
+                if (!device.createBond()) {
+                    Log.d(TAG, "onPreferenceClick: Could not initiate pairing");
+                    updateAvailableDeviceSummary(device, BluetoothDevice.BOND_NONE);
+                } else {
+                    Log.d(TAG, "onPreferenceClick: pairing in progress");
+                }
+                return true;
+            }
+        });
         switch (device.getBluetoothClass().getMajorDeviceClass()) {
             case AUDIO_VIDEO:
                 availableDevicePreference.setIcon(R.drawable.ic_headset);

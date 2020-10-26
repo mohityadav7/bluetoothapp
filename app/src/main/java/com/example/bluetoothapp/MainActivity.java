@@ -8,6 +8,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -59,6 +60,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         bluetoothIntentFilter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
         bluetoothIntentFilter.addAction(BluetoothDevice.ACTION_FOUND);
         bluetoothIntentFilter.addAction(BluetoothAdapter.ACTION_SCAN_MODE_CHANGED);
+        bluetoothIntentFilter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
         bluetoothBroadcastReceiver = new BluetoothBroadcastReceiver(this);
         registerReceiver(bluetoothBroadcastReceiver, bluetoothIntentFilter);
     }
@@ -156,6 +158,21 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
             if (availableDevices != null && !availableDevices.contains(device)) {
                 fragment.addAvailableDevicesPreferences(device);
                 availableDevices.add(device);
+            }
+        }
+    }
+
+    public void handleBondStateChanged(BluetoothDevice device, int bondState) {
+        SettingsFragment fragment = (SettingsFragment) getSupportFragmentManager().findFragmentByTag("SettingsFragment");
+        if (fragment != null && fragment.isAdded()) {
+            if (bondState == BluetoothDevice.BOND_BONDING) {
+                fragment.updateAvailableDeviceSummary(device, bondState);
+            } else if (bondState == BluetoothDevice.BOND_BONDED) {
+                fragment.addPairedDevicesPreference(device);
+                fragment.updateAvailableDeviceSummary(device, bondState);
+            } else { // BOND_NONE
+                fragment.updateAvailableDeviceSummary(device, bondState);
+                Log.d(TAG, "handleBondStateChanged: bond removed or could not pair");
             }
         }
     }

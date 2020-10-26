@@ -26,19 +26,22 @@ public class BluetoothBroadcastReceiver extends BroadcastReceiver {
         switch (action) {
             case BluetoothAdapter.ACTION_STATE_CHANGED:
                 int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1);
-
                 if (state == BluetoothAdapter.STATE_ON) {
                     main.setBluetoothStatusInPreferences(true);
+                    main.updateScanMenuItemVisibility(true);
                 } else if (state == BluetoothAdapter.STATE_OFF) {
                     main.setBluetoothStatusInPreferences(false);
+                    main.updateScanMenuItemVisibility(false);
                 }
                 break;
+
             case BluetoothDevice.ACTION_FOUND:
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 if (device != null) {
                     main.handleNewDeviceAvailable(device);
                 }
                 break;
+
             case BluetoothAdapter.ACTION_DISCOVERY_STARTED:
                 main.updateScanMenuItemText(true);
                 Log.d(TAG, "onReceive: Discovery started");
@@ -47,6 +50,7 @@ public class BluetoothBroadcastReceiver extends BroadcastReceiver {
                 main.updateScanMenuItemText(false);
                 Log.d(TAG, "onReceive: Discovery finished");
                 break;
+
             case BluetoothAdapter.ACTION_SCAN_MODE_CHANGED:
                 int scanMode = intent.getIntExtra(BluetoothAdapter.EXTRA_SCAN_MODE, -1);
                 if (scanMode == BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {
@@ -57,6 +61,7 @@ public class BluetoothBroadcastReceiver extends BroadcastReceiver {
                     Log.d(TAG, "onReceive: Scan mode: " + BluetoothAdapter.SCAN_MODE_NONE);
                 }
                 break;
+
             case BluetoothDevice.ACTION_BOND_STATE_CHANGED:
                 BluetoothDevice btDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 int bondState = intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE, -1);

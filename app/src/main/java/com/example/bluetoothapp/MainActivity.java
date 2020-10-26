@@ -26,6 +26,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 
     private static final int START_DISCOVERY = 1;
     private static String TAG = MainActivity.class.getSimpleName();
+    boolean foreground;
     BluetoothAdapter bluetoothAdapter;
     BluetoothBroadcastReceiver bluetoothBroadcastReceiver;
     SettingsFragment settingsFragment;
@@ -145,7 +146,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         }
     }
 
-    private void startDiscovery() {
+    public void startDiscovery() {
         // clear previously available devices
         availableDevices = new HashSet<>();
         SettingsFragment fragment = (SettingsFragment) getSupportFragmentManager().findFragmentByTag("SettingsFragment");
@@ -220,12 +221,14 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     @Override
     protected void onPause() {
         Utils.makeDeviceNotDiscoverable();
+        foreground = false;
         super.onPause();
     }
 
     @Override
     protected void onResume() {
         Utils.makeDeviceDiscoverable();
+        foreground = true;
         super.onResume();
     }
 

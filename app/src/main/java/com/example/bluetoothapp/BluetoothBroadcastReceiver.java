@@ -29,6 +29,7 @@ public class BluetoothBroadcastReceiver extends BroadcastReceiver {
                 if (state == BluetoothAdapter.STATE_ON) {
                     main.setBluetoothStatusInPreferences(true);
                     main.updateScanMenuItemVisibility(true);
+                    if (main.foreground) main.startDiscovery();
                 } else if (state == BluetoothAdapter.STATE_OFF) {
                     main.setBluetoothStatusInPreferences(false);
                     main.updateScanMenuItemVisibility(false);

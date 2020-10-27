@@ -1,12 +1,14 @@
 package com.example.bluetoothapp;
 
 import android.bluetooth.BluetoothDevice;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
 
 import java.lang.reflect.Method;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
@@ -84,6 +86,25 @@ public class PairedDeviceFragment extends PreferenceFragmentCompat {
             }
         });
         screen.addPreference(unpairPreference);
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        MainActivity main = (MainActivity) getActivity();
+        if(main != null) {
+            main.updateScanMenuItemVisibility(false);
+            main.bluetoothAdapter.cancelDiscovery();
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        MainActivity main = (MainActivity) getActivity();
+        if(main != null) {
+            main.updateScanMenuItemVisibility(true);
+        }
     }
 
     private boolean unpairDevice(BluetoothDevice device) {

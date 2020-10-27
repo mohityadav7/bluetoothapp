@@ -115,9 +115,9 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         getSupportFragmentManager().beginTransaction().replace(R.id.settings, new SettingsFragment(), "SettingsFragment").commitAllowingStateLoss();
     }
 
-    public void updateScanMenuItemVisibility(boolean bluetoothStatus) {
+    public void updateScanMenuItemVisibility(boolean visible) {
         MenuItem menuItem = optionsMenu.findItem(R.id.scan_menu_item);
-        menuItem.setVisible(bluetoothStatus);
+        menuItem.setVisible(visible);
     }
 
     // update scan menuItem text in options menu

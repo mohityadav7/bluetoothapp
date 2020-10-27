@@ -14,6 +14,7 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import java.util.HashSet;
+import java.util.Set;
 import java.util.Timer;
 
 import androidx.annotation.NonNull;
@@ -30,7 +31,8 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     BluetoothAdapter bluetoothAdapter;
     BluetoothBroadcastReceiver bluetoothBroadcastReceiver;
     SettingsFragment settingsFragment;
-    HashSet<BluetoothDevice> availableDevices;
+    Set<BluetoothDevice> availableDevicesSet;
+    Set<BluetoothDevice> pairedDevicesSet;
     Menu optionsMenu;
     Timer timer;
 
@@ -64,6 +66,9 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         bluetoothIntentFilter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
         bluetoothBroadcastReceiver = new BluetoothBroadcastReceiver(this);
         registerReceiver(bluetoothBroadcastReceiver, bluetoothIntentFilter);
+
+        // initialize pairedDevicesSet
+        pairedDevicesSet = Utils.getPairedDevices();
     }
 
     // inflate options menu
@@ -148,7 +153,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 
     public void startDiscovery() {
         // clear previously available devices
-        availableDevices = new HashSet<>();
+        availableDevicesSet = new HashSet<>();
         SettingsFragment fragment = (SettingsFragment) getSupportFragmentManager().findFragmentByTag("SettingsFragment");
         if (fragment != null && fragment.isAdded()) {
             fragment.clearAvailableDevicePreferenceCategory();
@@ -161,23 +166,28 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     public void handleNewDeviceAvailable(BluetoothDevice device) {
         SettingsFragment fragment = (SettingsFragment) getSupportFragmentManager().findFragmentByTag("SettingsFragment");
         if (fragment != null && fragment.isAdded()) {
-            if (availableDevices != null && !availableDevices.contains(device)) {
+            if (availableDevicesSet != null && !availableDevicesSet.contains(device)) {
                 fragment.addAvailableDevicesPreferences(device);
-                availableDevices.add(device);
+                availableDevicesSet.add(device);
             }
         }
     }
 
     public void handleBondStateChanged(BluetoothDevice device, int bondState) {
+        Set<BluetoothDevice> prevPairedDevicesSet = pairedDevicesSet;
+        pairedDevicesSet = Utils.getPairedDevices();
         SettingsFragment fragment = (SettingsFragment) getSupportFragmentManager().findFragmentByTag("SettingsFragment");
         if (fragment != null && fragment.isAdded()) {
             if (bondState == BluetoothDevice.BOND_BONDING) {
-                fragment.updateAvailableDeviceSummary(device, bondState);
+                fragment.updateAvailableDeviceSummary(device, bondState, null);
             } else if (bondState == BluetoothDevice.BOND_BONDED) {
-                fragment.addPairedDevicesPreference(device);
-                fragment.updateAvailableDeviceSummary(device, bondState);
+                fragment.updatePairedDevicesPreferences();
+                fragment.updateAvailableDeviceSummary(device, bondState, null);
             } else { // BOND_NONE
-                fragment.updateAvailableDeviceSummary(device, bondState);
+                fragment.updatePairedDevicesPreferences();
+                if (!prevPairedDevicesSet.contains(device) && !pairedDevicesSet.contains(device)) {
+                    fragment.updateAvailableDeviceSummary(device, bondState, null);
+                }
                 Log.d(TAG, "handleBondStateChanged: bond removed or could not pair");
             }
         }

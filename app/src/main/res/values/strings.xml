@@ -5,6 +5,10 @@
     <string name="paired_devices_header">Paired devices</string>
     <string name="available_devices_header">Available devices</string>
 
+    <!-- Preference category keys -->
+    <string name="paired_devices_preferences_category_key">paired_devices_preferences_category</string>
+    <string name="available_devices_preference_category_key">available_devices_preference_category</string>
+
     <!-- Content descriptions for ImageViews -->
     <string name="preference_icon_content_description">Preference icon</string>
     <string name="preference_setting_icon_content_description">Preference settings icon</string>

@@ -39,7 +39,7 @@ public class SettingsFragment extends PreferenceFragmentCompat {
         Set<BluetoothDevice> pairedDevices = Utils.getPairedDevices();
         if (pairedDevices.size() != 0 && !pairedDevicesPreferenceCategory.isVisible()) {
             pairedDevicesPreferenceCategory.setVisible(true);
-        } else if(pairedDevices.size() == 0) {
+        } else if (pairedDevices.size() == 0) {
             pairedDevicesPreferenceCategory.setVisible(false);
         }
 
@@ -115,7 +115,7 @@ public class SettingsFragment extends PreferenceFragmentCompat {
         PreferenceCategory availableDevicesPreferenceCategory = preferenceScreen
                 .findPreference(preferenceScreen.getContext().getResources()
                         .getString(R.string.available_devices_preference_category_key));
-        if(availableDevicesPreferenceCategory == null) return;
+        if (availableDevicesPreferenceCategory == null) return;
         Preference preferenceToUpdate = availableDevicesPreferenceCategory.findPreference(device.getAddress());
 
         if (preferenceToUpdate != null && summary == null) {
@@ -127,7 +127,7 @@ public class SettingsFragment extends PreferenceFragmentCompat {
             } else if (bondState == BluetoothDevice.BOND_NONE) {
                 preferenceToUpdate.setSummary("Could not pair");
             }
-        } else if(preferenceToUpdate != null) {
+        } else if (preferenceToUpdate != null) {
             preferenceToUpdate.setSummary(summary);
         }
     }
@@ -144,6 +144,11 @@ public class SettingsFragment extends PreferenceFragmentCompat {
             availableDevicesPreferenceCategory.setVisible(true);
         }
 
+        // check if device already exists in available devices, return add if already exists
+        if (availableDevicesPreferenceCategory.findPreference(device.getAddress()) != null) {
+            return;
+        }
+
         // create new available device preference
         Preference availableDevicePreference = new Preference(preferenceScreen.getContext());
         if (device.getName() != null) {
@@ -156,7 +161,7 @@ public class SettingsFragment extends PreferenceFragmentCompat {
             @Override
             public boolean onPreferenceClick(Preference preference) {
                 Set<BluetoothDevice> pairedDevices = Utils.getPairedDevices();
-                if(pairedDevices.contains(device)) {
+                if (pairedDevices.contains(device)) {
                     Toast.makeText(getContext(), "Already paired", Toast.LENGTH_SHORT).show();
                     return true;
                 }
@@ -185,6 +190,24 @@ public class SettingsFragment extends PreferenceFragmentCompat {
         }
         // add available device preference to available device preference category
         availableDevicesPreferenceCategory.addPreference(availableDevicePreference);
+    }
+
+    public void removeAvailableDevicePreference(BluetoothDevice device) {
+        PreferenceScreen preferenceScreen = getPreferenceManager().getPreferenceScreen();
+        // get available devices preference category
+        PreferenceCategory availableDevicesPreferenceCategory = preferenceScreen
+                .findPreference(preferenceScreen.getContext().getResources()
+                        .getString(R.string.available_devices_preference_category_key));
+        if (availableDevicesPreferenceCategory == null) return;
+        // get preference to remove and remove it
+        Preference preferenceToRemove = availableDevicesPreferenceCategory.findPreference(device.getAddress());
+        if (preferenceToRemove != null) {
+            availableDevicesPreferenceCategory.removePreference(preferenceToRemove);
+        }
+        //  hide category if no device is available
+        if (availableDevicesPreferenceCategory.getPreferenceCount() == 0) {
+            availableDevicesPreferenceCategory.setVisible(false);
+        }
     }
 
     public void clearAvailableDevicePreferenceCategory() {

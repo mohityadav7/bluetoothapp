@@ -186,10 +186,16 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
             } else if (bondState == BluetoothDevice.BOND_BONDED) {
                 fragment.updatePairedDevicesPreferences();
                 fragment.updateAvailableDeviceSummary(device, bondState, null);
+                fragment.removeAvailableDevicePreference(device);
             } else { // BOND_NONE
                 fragment.updatePairedDevicesPreferences();
+                // if could not pair
                 if (!prevPairedDevicesSet.contains(device) && !pairedDevicesSet.contains(device)) {
                     fragment.updateAvailableDeviceSummary(device, bondState, null);
+                }
+                // if device is unpaired
+                if (prevPairedDevicesSet.contains(device) && !pairedDevicesSet.contains(device)) {
+                    fragment.addAvailableDevicesPreferences(device);
                 }
                 Log.d(TAG, "handleBondStateChanged: bond removed or could not pair");
             }

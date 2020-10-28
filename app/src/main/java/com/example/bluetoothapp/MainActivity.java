@@ -76,6 +76,9 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
         optionsMenu = menu;
+        if (!bluetoothAdapter.isEnabled()) {
+            updateScanMenuItemVisibility(false);
+        }
         return super.onCreateOptionsMenu(menu);
     }
 

@@ -4,6 +4,7 @@ import android.Manifest.permission;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -18,6 +19,7 @@ import java.util.Set;
 import java.util.Timer;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -25,7 +27,7 @@ import androidx.preference.PreferenceManager;
 
 public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
 
-    private static final int START_DISCOVERY = 1;
+    public static final int START_DISCOVERY = 1;
     private static String TAG = MainActivity.class.getSimpleName();
     boolean foreground;
     BluetoothAdapter bluetoothAdapter;
@@ -162,8 +164,10 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
             fragment.clearAvailableDevicePreferenceCategory();
         }
         // start discovery
-        Utils.checkIfLocationEnabled(this);
-        bluetoothAdapter.startDiscovery();
+        Utils.enableLocationIfDisabled(this);
+        if (Utils.isLocationEnabled(this)) {
+            bluetoothAdapter.startDiscovery();
+        }
     }
 
     public void handleNewDeviceAvailable(BluetoothDevice device) {
@@ -202,6 +206,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         }
     }
 
+    // request permission if not already granted and start discovery if permission is granted
     private void requestLocationPermissionForStartingDiscovery() {
         if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission.ACCESS_FINE_LOCATION)) {
             new AlertDialog.Builder(this)
@@ -233,6 +238,16 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                 startDiscovery();
             } else {
                 Toast.makeText(this, "Could not start discovery", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == START_DISCOVERY) {
+            if (Utils.isLocationEnabled(this)) {
+                startDiscovery();
             }
         }
     }

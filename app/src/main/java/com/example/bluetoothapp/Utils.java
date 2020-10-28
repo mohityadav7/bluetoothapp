@@ -166,7 +166,25 @@ public class Utils {
         timer.schedule(action, timeInMilliseconds);
     }
 
-    public static void checkIfLocationEnabled(final Context context) {
+    public static void enableLocationIfDisabled(final Context context) {
+        if (!isLocationEnabled(context)) {
+            // notify user
+            new AlertDialog.Builder(context)
+                    .setTitle("Turn on location")
+                    .setMessage("Location must be on in order to start device discovery")
+                    .setPositiveButton("Go to Settings", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                                    ((MainActivity) context).startActivityForResult(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS), MainActivity.START_DISCOVERY);
+                                }
+                            }
+                    )
+                    .setNegativeButton("Cancel", null)
+                    .show();
+        }
+    }
+
+    public static boolean isLocationEnabled(final Context context) {
         boolean gpsEnabled = false;
         LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
 
@@ -176,20 +194,6 @@ public class Utils {
             Log.d(TAG, "checkIfGPSOn: Could not get location status, " + e.getMessage());
         }
 
-        if (!gpsEnabled) {
-            // notify user
-            new AlertDialog.Builder(context)
-                    .setTitle("Turn on location")
-                    .setMessage("Location must be on in order to start device discovery")
-                    .setPositiveButton("Go to Settings", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface paramDialogInterface, int paramInt) {
-                                    context.startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
-                                }
-                            }
-                    )
-                    .setNegativeButton("Cancel", null)
-                    .show();
-        }
+        return gpsEnabled;
     }
 }

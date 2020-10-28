@@ -4,10 +4,14 @@
     <!-- Preference Titles -->
     <string name="paired_devices_header">Paired devices</string>
     <string name="available_devices_header">Available devices</string>
+    <string name="supported_profiles_header">Supported profiles</string>
+    <string name="paired_device_details_header">Device details</string>
 
     <!-- Preference category keys -->
     <string name="paired_devices_preferences_category_key">paired_devices_preferences_category</string>
     <string name="available_devices_preference_category_key">available_devices_preference_category</string>
+    <string name="supported_profiles_category_key">supported_profiles_category_key</string>
+    <string name="paired_device_details_category_key">paired_device_details_category_key</string>
 
     <!-- Content descriptions for ImageViews -->
     <string name="preference_icon_content_description">Preference icon</string>

@@ -1,3 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory
+        android:title="@string/paired_device_details_header"
+        app:key="@string/paired_device_details_category_key">
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:isPreferenceVisible="false"
+        app:key="@string/supported_profiles_category_key"
+        app:title="@string/supported_profiles_header">
+    </PreferenceCategory>
+
 </PreferenceScreen>

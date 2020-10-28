@@ -4,13 +4,18 @@ import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.os.ParcelUuid;
 import android.util.Log;
 
+import org.javatuples.Triplet;
+
 import java.lang.reflect.Method;
+import java.util.HashSet;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.preference.Preference;
+import androidx.preference.PreferenceCategory;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceScreen;
 
@@ -32,6 +37,9 @@ public class PairedDeviceFragment extends PreferenceFragmentCompat {
 
         // add preference for device name
         final PreferenceScreen screen = getPreferenceScreen();
+        PreferenceCategory deviceDetailsPreferenceCategory = screen.findPreference(screen.getContext()
+                .getResources().getString(R.string.paired_device_details_category_key));
+
         Preference deviceNamePreference = new Preference(screen.getContext());
         deviceNamePreference.setIcon(R.drawable.ic_bluetooth);
         if (device != null && device.getName() != null) {
@@ -39,14 +47,16 @@ public class PairedDeviceFragment extends PreferenceFragmentCompat {
         } else {
             deviceNamePreference.setTitle("Unknown Device");
         }
-        screen.addPreference(deviceNamePreference);
+        if (deviceDetailsPreferenceCategory != null) {
+            deviceDetailsPreferenceCategory.addPreference(deviceNamePreference);
+        }
 
         // add preference for device address
-        if (device != null) {
+        if (device != null && deviceDetailsPreferenceCategory != null) {
             Preference deviceAddressPreference = new Preference(screen.getContext());
             deviceAddressPreference.setTitle(device.getAddress());
             deviceAddressPreference.setIcon(R.drawable.ic_address);
-            screen.addPreference(deviceAddressPreference);
+            deviceDetailsPreferenceCategory.addPreference(deviceAddressPreference);
         }
 
         // add unpair preference
@@ -85,14 +95,42 @@ public class PairedDeviceFragment extends PreferenceFragmentCompat {
                 return true;
             }
         });
-        screen.addPreference(unpairPreference);
+        if (deviceDetailsPreferenceCategory != null) {
+            deviceDetailsPreferenceCategory.addPreference(unpairPreference);
+        }
+
+        addProfilePreferences(device);
+    }
+
+    private void addProfilePreferences(BluetoothDevice device) {
+        if (device != null) {
+            HashSet<Triplet<String, String, ParcelUuid>> profiles = Utils.getUuidsWithName(device);
+            if (profiles.size() == 0) return;
+
+            // get preference screen and profiles category
+            PreferenceScreen screen = getPreferenceScreen();
+            PreferenceCategory profilesPreferencesCategory = screen.findPreference(screen.getContext()
+                    .getResources().getString(R.string.supported_profiles_category_key));
+            if (profilesPreferencesCategory == null) return;
+            profilesPreferencesCategory.removeAll();
+            profilesPreferencesCategory.setVisible(true);
+
+            for (Triplet<String, String, ParcelUuid> profile : profiles) {
+                // create new profile preference
+                Preference pref = new Preference(screen.getContext());
+                pref.setTitle(profile.getValue0());
+                pref.setSummary(profile.getValue1());
+                pref.setKey(profile.getValue2().toString());
+                profilesPreferencesCategory.addPreference(pref);
+            }
+        }
     }
 
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         MainActivity main = (MainActivity) getActivity();
-        if(main != null) {
+        if (main != null) {
             main.updateScanMenuItemVisibility(false);
             main.bluetoothAdapter.cancelDiscovery();
         }
@@ -102,7 +140,7 @@ public class PairedDeviceFragment extends PreferenceFragmentCompat {
     public void onDetach() {
         super.onDetach();
         MainActivity main = (MainActivity) getActivity();
-        if(main != null) {
+        if (main != null) {
             main.updateScanMenuItemVisibility(true);
         }
     }
